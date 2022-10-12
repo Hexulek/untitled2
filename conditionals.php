@@ -26,5 +26,7 @@ $losowa=rand(1,30);?>
 <?php else : ?>
     <h4 style="color: deeppink; text-align: center;">Trzecia dziesiątka</h4>
 <?php endif; ?>
+
+
 </body>
 </html>
