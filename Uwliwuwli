@@ -1,0 +1,58 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <cmath>
+#include <string>
+
+bool odczytajLiczbyZPliku(const std::string& nazwaPliku, int& liczbaLiczb, double& srednia, double& odchylenieStd) {
+    std::ifstream plik(nazwaPliku);
+    if (!plik.is_open()) {
+        return false; // Jeśli nie udało się otworzyć pliku, zwracamy false
+    }
+
+    std::vector<double> liczby; // Wektor do przechowywania liczb
+    double liczba;
+    while (plik >> liczba) {
+        liczby.push_back(liczba); // Odczytujemy kolejne liczby z pliku
+    }
+    plik.close();
+
+    liczbaLiczb = liczby.size();
+    if (liczbaLiczb == 0) {
+        srednia = 0;
+        odchylenieStd = 0;
+        return false; // Brak liczb w pliku
+    }
+
+    // Obliczanie średniej
+    double suma = 0;
+    for (double x : liczby) {
+        suma += x;
+    }
+    srednia = suma / liczbaLiczb;
+
+    // Obliczanie odchylenia standardowego
+    double sumaKwadratow = 0;
+    for (double x : liczby) {
+        sumaKwadratow += (x - srednia) * (x - srednia);
+    }
+    odchylenieStd = std::sqrt(sumaKwadratow / liczbaLiczb);
+
+    return true; // Jeśli operacja się powiodła, zwracamy true
+}
+
+int main() {
+    int liczbaLiczb;
+    double srednia, odchylenieStd;
+
+    // Przykład użycia funkcji
+    if (odczytajLiczbyZPliku("liczby.txt", liczbaLiczb, srednia, odchylenieStd)) {
+        std::cout << "Liczba liczb: " << liczbaLiczb << std::endl;
+        std::cout << "Średnia: " << srednia << std::endl;
+        std::cout << "Odchylenie standardowe: " << odchylenieStd << std::endl;
+    } else {
+        std::cout << "Wystąpił problem z odczytem pliku lub plik jest pusty." << std::endl;
+    }
+
+    return 0;
+}
