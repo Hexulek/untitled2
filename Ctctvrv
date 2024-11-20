@@ -1,0 +1,110 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <regex>
+#include <unordered_map>
+
+void processLine(const std::string& line, std::ofstream& outputFile) {
+    // Znalezienie polecenia w linii (po znaku '%')
+    size_t commandPos = line.find('%');
+    std::string content = line.substr(0, commandPos);
+    std::string command = (commandPos != std::string::npos) ? line.substr(commandPos + 1) : "";
+
+    // Trymowanie białych znaków z content
+    content = std::regex_replace(content, std::regex("^\\s+|\\s+$"), "");
+    if (content.empty()) return;
+
+    if (command.empty()) {
+        outputFile << content << std::endl;
+    } else if (command.find("remove") == 0) {
+        std::istringstream iss(command);
+        std::string subCommand, charsToRemove;
+        iss >> subCommand >> charsToRemove;
+
+        if (charsToRemove.empty()) {
+            content = std::regex_replace(content, std::regex("\\s+"), "");
+        } else {
+            for (char c : charsToRemove) {
+                content.erase(std::remove(content.begin(), content.end(), c), content.end());
+            }
+        }
+        outputFile << content << std::endl;
+    } else if (command.find("count") == 0) {
+        std::istringstream iss(command);
+        std::string subCommand, charsToCount;
+        iss >> subCommand >> charsToCount;
+
+        if (charsToCount.empty()) {
+            int whitespaceCount = std::count_if(content.begin(), content.end(), ::isspace);
+            outputFile << "space:" << whitespaceCount << std::endl;
+        } else {
+            std::unordered_map<char, int> countMap;
+            for (char c : charsToCount) countMap[c] = 0;
+
+            for (char c : content) {
+                if (countMap.find(c) != countMap.end()) countMap[c]++;
+            }
+
+            for (const auto& pair : countMap) {
+                outputFile << pair.first << ":" << pair.second << " ";
+            }
+            outputFile << std::endl;
+        }
+    } else if (command.find("replace") == 0) {
+        std::istringstream iss(command);
+        std::string subCommand, toReplace, replacement;
+        iss >> subCommand >> toReplace >> replacement;
+
+        if (!toReplace.empty()) {
+            size_t pos = 0;
+            while ((pos = content.find(toReplace, pos)) != std::string::npos) {
+                content.replace(pos, toReplace.length(), replacement);
+                pos += replacement.length();
+            }
+        }
+        outputFile << content << std::endl;
+    }
+}
+
+int main(int argc, char* argv[]) {
+    std::string inputFilePath;
+    const std::string outputFilePath = "tekstowy.txt"; // Nazwa pliku wyjściowego
+
+    // Parsowanie argumentów
+    for (int i = 1; i < argc; ++i) {
+        if (std::string(argv[i]) == "-i" && i + 1 < argc) {
+            inputFilePath = argv[++i];
+        }
+    }
+
+    if (inputFilePath.empty()) {
+        std::cerr << "Usage: " << argv[0] << " -i <input_file>" << std::endl;
+        return 1;
+    }
+
+    std::ifstream inputFile(inputFilePath);
+    std::ofstream outputFile(outputFilePath);
+
+    if (!inputFile.is_open()) {
+        std::cerr << "Error: Cannot open input file: " << inputFilePath << std::endl;
+        return 1;
+    }
+
+    if (!outputFile.is_open()) {
+        std::cerr << "Error: Cannot create output file: " << outputFilePath << std::endl;
+        return 1;
+    }
+
+    std::string line;
+    while (std::getline(inputFile, line)) {
+        processLine(line, outputFile);
+    }
+
+    inputFile.close();
+    outputFile.close();
+
+    std::cout << "Przetwarzanie zakończone. Wynik zapisano w pliku: " << outputFilePath << std::endl;
+
+    return 0;
+}
