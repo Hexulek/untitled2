@@ -1,0 +1,67 @@
+#include <iostream>
+#include <vector>
+#include <random>
+#include <limits>
+
+// Funkcja wypełniająca wektor losowymi liczbami całkowitymi
+void wypelnijWektorLosowymi(std::vector<int>& wektor, size_t rozmiar, int min = 0, int max = 100) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(min, max);
+
+    wektor.clear();
+    for (size_t i = 0; i < rozmiar; ++i) {
+        wektor.push_back(dis(gen));
+    }
+}
+
+// Funkcja wypisująca zawartość wektora na ekran
+void wypiszWektor(const std::vector<int>& wektor) {
+    std::cout << "[";
+    for (size_t i = 0; i < wektor.size(); ++i) {
+        std::cout << wektor[i];
+        if (i < wektor.size() - 1) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "]" << std::endl;
+}
+
+// Funkcja znajdująca minimum i maksimum w wektorze
+void znajdzMinMax(const std::vector<int>& wektor, int& min, int& max) {
+    if (wektor.empty()) {
+        throw std::invalid_argument("Wektor jest pusty!");
+    }
+
+    min = std::numeric_limits<int>::max();
+    max = std::numeric_limits<int>::min();
+
+    for (int liczba : wektor) {
+        if (liczba < min) min = liczba;
+        if (liczba > max) max = liczba;
+    }
+}
+
+int main() {
+    std::vector<int> liczby;
+    size_t rozmiar = 10; // Liczba elementów w wektorze
+    int minZakres = 1, maxZakres = 50; // Zakres liczb losowych
+
+    // Wypełniamy wektor losowymi wartościami
+    wypelnijWektorLosowymi(liczby, rozmiar, minZakres, maxZakres);
+
+    // Wypisujemy zawartość wektora
+    std::cout << "Zawartość wektora: ";
+    wypiszWektor(liczby);
+
+    // Znajdujemy minimum i maksimum
+    int min, max;
+    try {
+        znajdzMinMax(liczby, min, max);
+        std::cout << "Minimum: " << min << ", Maksimum: " << max << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Błąd: " << e.what() << std::endl;
+    }
+
+    return 0;
+}
