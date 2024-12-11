@@ -3,32 +3,56 @@
 #include <string>
 #include <map>
 #include <sstream>
+#include <vector>
 
-void countWordFrequencies(const std::string& filename) {
+void countWordFrequenciesAndPairs(const std::string& filename) {
     std::ifstream file(filename); // Otwieranie pliku
     if (!file.is_open()) {
         std::cerr << "Nie można otworzyć pliku: " << filename << std::endl;
         return;
     }
 
-    std::map<std::string, int> wordFrequencies;
-    std::string line, word;
+    std::map<std::string, int> wordFrequencies; // Mapa do zliczania pojedynczych słów
+    std::map<std::string, std::map<std::string, int>> wordPairFrequencies; // Mapa do zliczania par słów
+
+    std::string line, word, prevWord;
 
     // Czytanie pliku linia po linii
     while (std::getline(file, line)) {
         std::stringstream ss(line); // Przetwarzanie każdej linii
+        prevWord = ""; // Resetujemy poprzednie słowo na początku każdej linii
+
         while (ss >> word) {
-            // Zwiększamy licznik dla danego słowa
+            // Zwiększamy licznik dla pojedynczego słowa
             ++wordFrequencies[word];
+
+            // Jeśli istnieje poprzednie słowo, zliczamy parę słów
+            if (!prevWord.empty()) {
+                ++wordPairFrequencies[prevWord][word];
+            }
+
+            // Aktualizujemy poprzednie słowo
+            prevWord = word;
         }
     }
 
     file.close();
 
-    // Wyświetlenie wyników
+    // Wyświetlenie wyników dla pojedynczych słów
     std::cout << "Częstotliwości słów w pliku " << filename << ":\n";
     for (const auto& entry : wordFrequencies) {
         std::cout << entry.first << ": " << entry.second << "\n";
+    }
+
+    std::cout << "\nCzęstotliwości par słów w pliku " << filename << ":\n";
+    for (const auto& entry : wordPairFrequencies) {
+        const std::string& firstWord = entry.first;
+        const auto& secondWordMap = entry.second;
+
+        std::cout << firstWord << ":\n";
+        for (const auto& pair : secondWordMap) {
+            std::cout << "  " << pair.first << ": " << pair.second << "\n";
+        }
     }
 }
 
@@ -37,7 +61,7 @@ int main() {
     std::cout << "Podaj nazwę pliku: ";
     std::cin >> filename;
 
-    countWordFrequencies(filename);
+    countWordFrequenciesAndPairs(filename);
 
     return 0;
 }
