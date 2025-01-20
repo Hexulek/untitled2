@@ -1,0 +1,22 @@
+
+p: 
+WPR 1
+ODE znak
+SOZ z
+SOB p
+
+z:
+POB li
+DOD jeden
+LAD li
+ODE cztery
+SOZ end
+SOB p
+
+end:
+STP
+
+li: RST 0
+cztery: RST 4
+jeden: RST 1
+znak: RST 42
